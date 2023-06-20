@@ -1,6 +1,6 @@
 Name:    	qt-at-spi
 Version: 	0.3.1
-Release: 	1
+Release: 	2
 Summary: 	Qt plugin that bridges Qt's accessibility API to AT-SPI2 
 
 License: 	LGPLv2+
@@ -31,7 +31,13 @@ install -m644 -p %{SOURCE1} .
 
 
 %build
-%{qmake_qt4}
+%if "%toolchain" == "clang"
+	export CFLAGS="$CFLAGS -Wno-error=deprecated-copy-with-user-provided-copy -Wno-error=sometimes-uninitialized"
+	export CXXFLAGS="$CXXFLAGS -Wno-error=deprecated-copy-with-user-provided-copy -Wno-error=sometimes-uninitialized"
+	%{qmake_qt4} -spec %{_libdir}/qt4/mkspecs/unsupported/linux-clang
+%else
+	%{qmake_qt4}
+%endif
 %make_build
 
 # build docs
@@ -56,5 +62,8 @@ make install INSTALL_ROOT=%{buildroot}
 
 
 %changelog
+* Tue Jun 20 2023 yoo <sunyuechi@iscas.ac.cn> - 0.3.1-2
+- fix clang build error
+
 * Thu Feb 18 2021 weidong <weidong@uniontech.com> - 0.3.1-1
 - Initial package 
